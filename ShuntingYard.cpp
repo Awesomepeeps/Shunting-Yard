@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <cctype>
 
 using namespace std;
 
@@ -39,7 +40,7 @@ public:
     char pop() {
         if (top == nullptr) {
             cout << "stack is empty" << endl;
-            return;
+            return '\0';
         }
         char data = top->getdata();
         node* temp = top;
@@ -51,7 +52,7 @@ public:
     char peek() {
         if (top == nullptr) {
             cout << "stack is empty" << endl;
-            return;
+            return '\0';
         }
         return top->getdata();
     }
@@ -82,7 +83,7 @@ public:
     char dequeue() {
         if (front == nullptr) {
             cout << "queue is empty" << endl;
-            return;
+            return '\0';
         }
         char data = front->getdata();
         node* temp = front;
@@ -139,14 +140,15 @@ treenode* buildTree(string& postfixExpression);
 void printInfix(treenode* node);
 void printPrefix(treenode* node);
 void printPostfix(treenode* node);
+int precedence(char op);
 
 int main() {
     string infixExpression;
     cout << "Enter the mathematical expression in infix notation: ";
     getline(cin, infixExpression);
 
-    string postfixExpression = shunting_yard(infixExpression);
-    treenode* expressionTree = build_expressionTree(postfixExpression);
+    string postfixExpression = shuntingYard(infixExpression);
+    treenode* expressionTree = buildTree(postfixExpression);
 
     string input;
 
@@ -156,39 +158,74 @@ int main() {
 
     if (input.compare("infix") == 0) {
         cout << "Infix notation: ";
-        print_infix(expressionTree);
+        printInfix(expressionTree);
         cout << endl;
     }
     else if (input.compare("prefix") == 0) {
         cout << "Prefix notation: ";
-        print_prefix(expressionTree);
+        printPrefix(expressionTree);
         cout << endl;
     }
     else if (input.compare("postfix") == 0) {
         cout << "Postfix notation: ";
-        print_postfix(expressionTree);
+        printPostfix(expressionTree);
         cout << endl;
     }
 }
 
-string shunting_yard(const string& infixExpression) {
-    // Implement the Shunting Yard algorithm
-    return "";  // Placeholder
+int precedence(char op) {
+    if (op == '+' || op == '-')
+        return 1;
+    else if (op == '*' || op == '/')
+        return 2;
+    else if (op == '^')
+        return 3;
+    else
+        return -1; // Invalid operator
 }
 
-treenode* build_expressionTree(const string& postfixExpression) {
-    // Implement construction of expression tree
-    return nullptr;  // Placeholder
+string shuntingYard(string& infixExpression) {
+    string postfix;
+    stack operators;
+    queue output;
+    for (char token : infixExpression) {
+        if (isalnum(token)) {
+            output.enqueue(token);
+        } else if (token == '(') {
+            operators.push(token);
+        } else if (token == ')') {
+            while (!operators.isEmpty() && operators.peek() != '(') {
+                output.enqueue(operators.pop());
+            }
+            operators.pop(); // Discard '('
+        } else {
+            while (!operators.isEmpty() && precedence(operators.peek()) >= precedence(token)) {
+                output.enqueue(operators.pop());
+            }
+            operators.push(token);
+        }
+    }
+
+    while (!operators.isEmpty()) {
+        output.enqueue(operators.pop());
+    }
+
+    while (!output.isEmpty()) {
+        postfix += output.dequeue();
+    }
+
+    return postfix;
 }
 
-void print_infix(treenode* node) {
-    // Implement printing infix expression recursively
+treenode* buildTree(string& postfixExpression) {
+    return nullptr;
 }
 
-void print_prefix(treenode* node) {
-    // Implement printing prefix expression recursively
+void printInfix(treenode* node) {
 }
 
-void print_postfix(treenode* node) {
-    // Implement printing postfix expression recursively
+void printPrefix(treenode* node) {
+}
+
+void printPostfix(treenode* node) {
 }
