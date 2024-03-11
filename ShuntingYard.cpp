@@ -144,7 +144,7 @@ int precedence(char op);
 
 int main() {
     string infixExpression;
-    cout << "Enter the mathematical expression in infix notation: ";
+    cout << "Enter the mathematical expression: ";
     getline(cin, infixExpression);
 
     string postfixExpression = shuntingYard(infixExpression);
@@ -218,14 +218,62 @@ string shuntingYard(string& infixExpression) {
 }
 
 treenode* buildTree(string& postfixExpression) {
-    return nullptr;
+    treenode* root = nullptr;
+    treenode* current = nullptr;
+
+    for (char token : postfixExpression) {
+        if (isalnum(token)) {
+            treenode* newNode = new treenode(token);
+            if (!root) {
+                root = newNode;
+            } else {
+                current->setRight(newNode);
+            }
+            current = newNode;
+        } else {
+            treenode* newNode = new treenode(token);
+            if (!current->getLeft()) {
+                newNode->setLeft(root);
+                root = newNode;
+            } else {
+                newNode->setLeft(current->getRight());
+                current->setRight(newNode);
+            }
+            current = newNode;
+        }
+    }
+
+    return root;
 }
 
+
 void printInfix(treenode* node) {
+    if (node) {
+        if (node->getLeft() && node->getRight()) {
+            cout << "(";
+            printInfix(node->getLeft());
+            cout << node->getData();
+            printInfix(node->getRight());
+            cout << ")";
+        } else {
+            cout << node->getData();
+        }
+    }
 }
 
 void printPrefix(treenode* node) {
+    if (node) {
+        cout << node->getData();
+        printPrefix(node->getLeft());
+        printPrefix(node->getRight());
+    }
 }
 
 void printPostfix(treenode* node) {
+    if (node) {
+        printPostfix(node->getLeft());
+        printPostfix(node->getRight());
+        cout << node->getData();
+    }
 }
+
